@@ -1,0 +1,288 @@
+
+cd ~/code/yugabyte-db/build/debug-clang12-dynamic-ninja/bin
+./yb-admin create_change_data_stream ysql.yugabyte --master_addresses 10.150.0.195:7100
+
+
+curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" localhost:8083/connectors/ -d '{
+  "name": "ybconnector",
+  "config": {
+    "connector.class": "io.debezium.connector.yugabytedb.YugabyteDBConnector",
+    "database.hostname":"10.150.6.247",
+    "database.master.addresses":"10.150.6.245:7100,10.150.6.247:7100,10.150.6.248:7100",
+    "database.port":"5433",
+    "database.user": "yugabyte",
+    "database.password": "yugabyte",
+    "database.dbname" : "yugabyte",
+    "database.server.name": "dbserver1",
+    "table.include.list":"public.api_apple_store_receipt_log,public.api_sub_user_packages,public.api_oauth_access_token,public.api_sub_apple_orig_transactions,public.api_sub_recurly_notify_log,public.api_user_device,public.api_user_partner_transaction_log,public.api_watch_list,public.user_profile",
+    "snapshot.mode": "never",
+    "tasks.max": "10",
+    "database.streamid": "2dd6022563fd4690b04da3289f04e2fd",
+    "table.max.num.tablets": "100"
+  }
+}'
+  
+
+curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" localhost:8083/connectors/ -d '{
+  "name": "jdbc-sink-1",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",    
+     "tasks.max": "3",
+      "topics": "dbserver1.public.api_apple_store_receipt_log",
+      "dialect.name": "MySqlDatabaseDialect",
+      "table.name.format": "api_apple_store_receipt_log",    
+      "connection.url": "jdbc:mysql://10.150.1.78:3306/mysql?user=mysqluser&password=mysqlpw&sslMode=required",    
+      "transforms": "unwrap",    
+      "transforms.unwrap.type": "io.debezium.connector.yugabytedb.transforms.YBExtractNewRecordState",   
+      "transforms.unwrap.drop.tombstones": "false",
+      "auto.create": "true",   
+      "insert.mode": "upsert",    
+      "pk.fields": "k",    
+      "pk.mode": "record_key",   
+      "delete.enabled": "true",
+      "auto.evolve":"true"
+   }
+}'
+
+curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" localhost:8083/connectors/ -d '{
+  "name": "jdbc-sink-2",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",    
+     "tasks.max": "3",
+      "topics": "dbserver1.public.api_sub_user_packages",
+      "dialect.name": "MySqlDatabaseDialect",
+      "table.name.format": "api_sub_user_packages",    
+      "connection.url": "jdbc:mysql://10.150.1.78:3306/mysql?user=mysqluser&password=mysqlpw&sslMode=required",    
+      "transforms": "unwrap",    
+      "transforms.unwrap.type": "io.debezium.connector.yugabytedb.transforms.YBExtractNewRecordState",   
+      "transforms.unwrap.drop.tombstones": "false",
+      "auto.create": "true",   
+      "insert.mode": "upsert",    
+      "pk.fields": "k",    
+      "pk.mode": "record_key",   
+      "delete.enabled": "true",
+      "auto.evolve":"true",
+      "transforms": "unwrap,ts_createddate,ts_enddate,ts_pspmodifieddate,ts_updateddate,ts_startdate",
+      "transforms.ts_createddate.type": "org.apache.kafka.connect.transforms.TimestampConverter$Value",
+      "transforms.ts_createddate.target.type": "Timestamp",
+      "transforms.ts_createddate.field": "createddate",
+      "transforms.ts_createddate.format": "YYYY-MM-dd'\''T'\''HH:mm:ss'\''Z'\''",
+      "transforms.ts_enddate.type": "org.apache.kafka.connect.transforms.TimestampConverter$Value",
+      "transforms.ts_enddate.target.type": "Timestamp",
+      "transforms.ts_enddate.field": "enddate",
+      "transforms.ts_enddate.format": "YYYY-MM-dd'\''T'\''HH:mm:ss'\''Z'\''",
+      "transforms.ts_pspmodifieddate.type": "org.apache.kafka.connect.transforms.TimestampConverter$Value",
+      "transforms.ts_pspmodifieddate.target.type": "Timestamp",
+      "transforms.ts_pspmodifieddate.field": "pspmodifieddate",
+      "transforms.ts_pspmodifieddate.format": "YYYY-MM-dd'\''T'\''HH:mm:ss'\''Z'\''",
+      "transforms.ts_updateddate.type": "org.apache.kafka.connect.transforms.TimestampConverter$Value",
+      "transforms.ts_updateddate.target.type": "Timestamp",
+      "transforms.ts_updateddate.field": "updateddate",
+      "transforms.ts_updateddate.format": "YYYY-MM-dd'\''T'\''HH:mm:ss'\''Z'\''",
+      "transforms.ts_startdate.type": "org.apache.kafka.connect.transforms.TimestampConverter$Value",
+      "transforms.ts_startdate.target.type": "Timestamp",
+      "transforms.ts_startdate.field": "startdate",
+      "transforms.ts_startdate.format": "YYYY-MM-dd'\''T'\''HH:mm:ss'\''Z'\''"    
+   }
+}'
+
+curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" localhost:8083/connectors/ -d '{
+  "name": "jdbc-sink-3",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",    
+     "tasks.max": "3",
+      "topics": "dbserver1.public.api_oauth_access_token",
+      "dialect.name": "MySqlDatabaseDialect",
+      "table.name.format": "api_oauth_access_token",    
+      "connection.url": "jdbc:mysql://10.150.1.78:3306/mysql?user=mysqluser&password=mysqlpw&sslMode=required",    
+      "transforms": "unwrap",    
+      "transforms.unwrap.type": "io.debezium.connector.yugabytedb.transforms.YBExtractNewRecordState",   
+      "transforms.unwrap.drop.tombstones": "false",
+      "auto.create": "true",   
+      "insert.mode": "upsert",    
+      "pk.fields": "k",    
+      "pk.mode": "record_key",   
+      "delete.enabled": "true",
+      "auto.evolve":"true",
+      "transforms": "unwrap,ts_expires_in",
+      "transforms.ts_expires_in.type": "org.apache.kafka.connect.transforms.TimestampConverter$Value",
+      "transforms.ts_expires_in.target.type": "Timestamp",
+      "transforms.ts_expires_in.field": "expires_in",
+      "transforms.ts_expires_in.format": "YYYY-MM-dd'\''T'\''HH:mm:ss'\''Z'\''"
+   }
+}'
+
+
+curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" localhost:8083/connectors/ -d '{
+  "name": "jdbc-sink-4",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",    
+     "tasks.max": "3",
+      "topics": "dbserver1.public.api_sub_apple_orig_transactions",
+      "dialect.name": "MySqlDatabaseDialect",
+      "table.name.format": "api_sub_apple_orig_transactions",    
+      "connection.url": "jdbc:mysql://10.150.1.78:3306/mysql?user=mysqluser&password=mysqlpw&sslMode=required",    
+      "transforms": "unwrap",    
+      "transforms.unwrap.type": "io.debezium.connector.yugabytedb.transforms.YBExtractNewRecordState",   
+      "transforms.unwrap.drop.tombstones": "false",
+      "auto.create": "true",   
+      "insert.mode": "upsert",    
+      "pk.fields": "k",    
+      "pk.mode": "record_key",   
+      "delete.enabled": "true",
+      "auto.evolve":"true",
+      "transforms": "unwrap,ts_createddate,ts_lastcheckeddate",
+      "transforms.ts_createddate.type": "org.apache.kafka.connect.transforms.TimestampConverter$Value",
+      "transforms.ts_createddate.target.type": "Timestamp",
+      "transforms.ts_createddate.field": "createddate",
+      "transforms.ts_createddate.format": "YYYY-MM-dd'\''T'\''HH:mm:ss'\''Z'\''",
+      "transforms.ts_lastcheckeddate.type": "org.apache.kafka.connect.transforms.TimestampConverter$Value",
+      "transforms.ts_lastcheckeddate.target.type": "Timestamp",
+      "transforms.ts_lastcheckeddate.field": "lastcheckeddate",
+      "transforms.ts_lastcheckeddate.format": "YYYY-MM-dd'\''T'\''HH:mm:ss'\''Z'\''"
+   }
+}'
+
+curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" localhost:8083/connectors/ -d '{
+  "name": "jdbc-sink-5",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",    
+     "tasks.max": "3",
+      "topics": "dbserver1.public.api_sub_recurly_notify_log",
+      "dialect.name": "MySqlDatabaseDialect",
+      "table.name.format": "api_sub_recurly_notify_log",    
+      "connection.url": "jdbc:mysql://10.150.1.78:3306/mysql?user=mysqluser&password=mysqlpw&sslMode=required",    
+      "transforms": "unwrap",    
+      "transforms.unwrap.type": "io.debezium.connector.yugabytedb.transforms.YBExtractNewRecordState",   
+      "transforms.unwrap.drop.tombstones": "false",
+      "auto.create": "true",   
+      "insert.mode": "upsert",    
+      "pk.fields": "k",    
+      "pk.mode": "record_key",   
+      "delete.enabled": "true",
+      "auto.evolve":"true",
+      "transforms": "unwrap,ts_ingestdate",
+      "transforms.ts_ingestdate.type": "org.apache.kafka.connect.transforms.TimestampConverter$Value",
+      "transforms.ts_ingestdate.target.type": "Timestamp",
+      "transforms.ts_ingestdate.field": "ingestdate",
+      "transforms.ts_ingestdate.format": "YYYY-MM-dd'\''T'\''HH:mm:ss'\''Z'\''"
+   }
+}'
+
+
+curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" localhost:8083/connectors/ -d '{
+  "name": "jdbc-sink-6",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",    
+     "tasks.max": "3",
+      "topics": "dbserver1.public.api_user_device",
+      "dialect.name": "MySqlDatabaseDialect",
+      "table.name.format": "api_user_device",    
+      "connection.url": "jdbc:mysql://10.150.1.78:3306/mysql?user=mysqluser&password=mysqlpw&sslMode=required",    
+      "transforms": "unwrap",    
+      "transforms.unwrap.type": "io.debezium.connector.yugabytedb.transforms.YBExtractNewRecordState",   
+      "transforms.unwrap.drop.tombstones": "false",
+      "auto.create": "true",   
+      "insert.mode": "upsert",    
+      "pk.fields": "k",    
+      "pk.mode": "record_key",   
+      "delete.enabled": "true",
+      "auto.evolve":"true",
+      "transforms": "unwrap,ts_createddate,ts_lastupdate",
+      "transforms.ts_createddate.type": "org.apache.kafka.connect.transforms.TimestampConverter$Value",
+      "transforms.ts_createddate.target.type": "Timestamp",
+      "transforms.ts_createddate.field": "createddate",
+      "transforms.ts_createddate.format": "YYYY-MM-dd'\''T'\''HH:mm:ss'\''Z'\''",
+      "transforms.ts_lastupdate.type": "org.apache.kafka.connect.transforms.TimestampConverter$Value",
+      "transforms.ts_lastupdate.target.type": "Timestamp",
+      "transforms.ts_lastupdate.field": "lastupdate",
+      "transforms.ts_lastupdate.format": "YYYY-MM-dd'\''T'\''HH:mm:ss'\''Z'\''"
+   }
+}'
+
+
+curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" localhost:8083/connectors/ -d '{
+  "name": "jdbc-sink-7",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",    
+     "tasks.max": "3",
+      "topics": "dbserver1.public.api_user_partner_transaction_log",
+      "dialect.name": "MySqlDatabaseDialect",
+      "table.name.format": "api_user_partner_transaction_log",    
+      "connection.url": "jdbc:mysql://10.150.1.78:3306/mysql?user=mysqluser&password=mysqlpw&sslMode=required",    
+      "transforms": "unwrap",    
+      "transforms.unwrap.type": "io.debezium.connector.yugabytedb.transforms.YBExtractNewRecordState",   
+      "transforms.unwrap.drop.tombstones": "false",
+      "auto.create": "true",   
+      "insert.mode": "upsert",    
+      "pk.fields": "k",    
+      "pk.mode": "record_key",   
+      "delete.enabled": "true",
+      "auto.evolve":"true"
+   }
+}'
+
+
+curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" localhost:8083/connectors/ -d '{
+  "name": "jdbc-sink-8",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",    
+     "tasks.max": "3",
+      "topics": "dbserver1.public.api_watch_list",
+      "dialect.name": "MySqlDatabaseDialect",
+      "table.name.format": "api_watch_list",    
+      "connection.url": "jdbc:mysql://10.150.1.78:3306/mysql?user=mysqluser&password=mysqlpw&sslMode=required",    
+      "transforms": "unwrap",    
+      "transforms.unwrap.type": "io.debezium.connector.yugabytedb.transforms.YBExtractNewRecordState",   
+      "transforms.unwrap.drop.tombstones": "false",
+      "auto.create": "true",   
+      "insert.mode": "upsert",    
+      "pk.fields": "k",    
+      "pk.mode": "record_key",   
+      "delete.enabled": "true",
+      "auto.evolve":"true",
+      "transforms": "unwrap,ts_createddate,ts_updateddate",
+      "transforms.ts_createddate.type": "org.apache.kafka.connect.transforms.TimestampConverter$Value",
+      "transforms.ts_createddate.target.type": "Timestamp",
+      "transforms.ts_createddate.field": "createddate",
+      "transforms.ts_createddate.format": "YYYY-MM-dd'\''T'\''HH:mm:ss'\''Z'\''",
+      "transforms.ts_updateddate.type": "org.apache.kafka.connect.transforms.TimestampConverter$Value",
+      "transforms.ts_updateddate.target.type": "Timestamp",
+      "transforms.ts_updateddate.field": "updateddate",
+      "transforms.ts_updateddate.format": "YYYY-MM-dd'\''T'\''HH:mm:ss'\''Z'\''"
+   }
+}'
+
+
+curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" localhost:8083/connectors/ -d '{
+  "name": "jdbc-sink-9",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",    
+     "tasks.max": "3",
+      "topics": "dbserver1.public.user_profile",
+      "dialect.name": "MySqlDatabaseDialect",
+      "table.name.format": "user_profile",    
+      "connection.url": "jdbc:mysql://10.150.1.78:3306/mysql?user=mysqluser&password=mysqlpw&sslMode=required",    
+      "transforms": "unwrap",    
+      "transforms.unwrap.type": "io.debezium.connector.yugabytedb.transforms.YBExtractNewRecordState",   
+      "transforms.unwrap.drop.tombstones": "false",
+      "auto.create": "true",   
+      "insert.mode": "upsert",    
+      "pk.fields": "k",    
+      "pk.mode": "record_key",   
+      "delete.enabled": "true",
+      "auto.evolve":"true",
+      "transforms": "unwrap,ts_createddate,ts_updateddate",
+      "transforms.ts_createddate.type": "org.apache.kafka.connect.transforms.TimestampConverter$Value",
+      "transforms.ts_createddate.target.type": "Timestamp",
+      "transforms.ts_createddate.field": "createddate",
+      "transforms.ts_createddate.format": "YYYY-MM-dd'\''T'\''HH:mm:ss'\''Z'\''",
+      "transforms.ts_updateddate.type": "org.apache.kafka.connect.transforms.TimestampConverter$Value",
+      "transforms.ts_updateddate.target.type": "Timestamp",
+      "transforms.ts_updateddate.field": "updateddate",
+      "transforms.ts_updateddate.format": "YYYY-MM-dd'\''T'\''HH:mm:ss'\''Z'\''"
+   }
+}'
+
+             
+             

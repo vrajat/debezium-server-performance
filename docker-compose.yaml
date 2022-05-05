@@ -12,6 +12,9 @@ services:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
       ALLOW_ANONYMOUS_LOGIN: "yes"
+    volumes:
+      - $PWD/volumes/kafka/zk-data:/var/lib/zookeeper/data
+      - $PWD/volumes/kafka/zk-txn-logs:/var/lib/zookeeper/log
 
   kafka:
     container_name: kafka
@@ -35,6 +38,8 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_OPTS: -Djdk.tls.client.protocols=TLSv1.2
+  volumes:
+    - $PWD/volumes/kafka/kafka-data::/var/lib/kafka/data
 
   kafka-ui:
     container_name: kafka-ui
