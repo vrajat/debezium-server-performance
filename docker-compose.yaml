@@ -1,0 +1,103 @@
+services:
+  zookeeper:
+    container_name: zookeeper
+    image: debezium/zookeeper:1.6
+    user: "0:0"
+    ports:
+      - 2181:2181
+      - 2888:2888
+      - 3888:3888
+    restart: unless-stopped
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      ALLOW_ANONYMOUS_LOGIN: "yes"
+
+  kafka:
+    container_name: kafka
+    image: debezium/kafka:1.6
+    links:
+      - zookeeper
+    user: "0:0"
+    ports:
+      - 9092:9092
+      - 9099:9099
+    restart: unless-stopped
+    environment:
+      KAFKA_CFG_BROKER_ID: 100
+      ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_CFG_LISTENERS: "CLIENT://:9093,EXTERNAL://:9092"
+      KAFKA_CFG_ADVERTISED_LISTENERS: "CLIENT://:9093,EXTERNAL://kafka:9092"
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: "CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT"
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: CLIENT
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_OPTS: -Djdk.tls.client.protocols=TLSv1.2
+
+  kafka-ui:
+    container_name: kafka-ui
+    image: provectuslabs/kafka-ui:latest
+    ports:
+      - 8079:8080
+    depends_on:
+      - kafka
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: 'kafka:9092'
+
+  debezium:
+    image: yugabytedb/debezium-server:1.7.0-yb-1
+    container_name: debezium-server
+    ports:
+      - 8080:8080
+    environment:
+      DEBEZIUM_SINK_TYPE: kafka
+      DEBEZIUM_SINK_KAFKA_PRODUCER_BOOTSTRAP_SERVERS: "kafka:9092"
+      DEBEZIUM_SINK_KAFKA_PRODUCER_KEY_SERIALIZER: org.apache.kafka.common.serialization.StringSerializer
+      DEBEZIUM_SINK_KAFKA_PRODUCER_VALUE_SERIALIZER: org.apache.kafka.common.serialization.StringSerializer
+      DEBEZIUM_SOURCE_CONNECTOR_CLASS: io.debezium.connector.yugabytedb.YugabyteDBConnector
+      DEBEZIUM_SOURCE_OFFSET_STORAGE_FILE_FILENAME: data/offsets.dat
+      DEBEZIUM_SOURCE_OFFSET_FLUSH_INTERVAL_MS: 0
+      DEBEZIUM_SOURCE_DATABASE_HOSTNAME: 10.150.0.116
+      DEBEZIUM_SOURCE_DATABASE_PORT: 5433
+      DEBEZIUM_SOURCE_DATABASE_USER: yugabyte
+      DEBEZIUM_SOURCE_DATABASE_PASSWORD: yugabyte
+      DEBEZIUM_SOURCE_DATABASE_DBNAME: yugabyte
+      DEBEZIUM_SOURCE_DATABASE_SERVER_NAME: dbserver1
+      DEBEZIUM_SOURCE_DATABASE_STREAMID: fc2abfb129c64593840b32c69acd25d7
+      DEBEZIUM_SOURCE_TABLE_INCLUDE_LIST: public.cdc_dbz_table
+      DEBEZIUM_SOURCE_DATABASE_MASTER_ADDRESSES: "10.150.0.116:7100,10.150.0.126:7100,10.150.0.89:7100"
+      DEBEZIUM_SOURCE_SNAPSHOT_MODE: never
+    volumes:
+      - $PWD/volumes/debezium/data:/debezium/data
+
+  kafka-connect:
+    container_name: kafka-connect
+    image: quay.io/yugabyte/connect-jdbc-es:1.0
+    depends_on: [ kafka, pg]
+    ports:
+      - 8083:8083
+    restart: unless-stopped
+    environment:
+      BOOTSTRAP_SERVERS: "kafka:9092"
+      GROUP_ID: kafka-connect-group
+      CONFIG_STORAGE_TOPIC: kafka-connect_configs
+      CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      OFFSET_STORAGE_TOPIC: kafka-connect_offset
+      OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      STATUS_STORAGE_TOPIC: kafka-connect_status
+      STATUS_STORAGE_REPLICATION_FACTOR: 1
+      REST_ADVERTISED_HOST_NAME: kafka-connect
+      CONNECT_REST_PORT: 8083
+
+  pg:
+    container_name: pg
+    image: debezium/example-postgres:1.6
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
