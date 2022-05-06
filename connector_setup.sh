@@ -5,7 +5,7 @@ set -e
 FILE=$PWD/settings.env
 
 if test -f "$FILE"; then
-    export $(grep -v '^#' settings.env | xargs)
+    export $(grep -v '^#' $FILE | xargs)
 fi
 
 export PATH=$PATH:$YBPATH

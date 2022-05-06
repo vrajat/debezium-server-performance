@@ -1,5 +1,5 @@
 # debezium-server-performance
-Test Debezium Server Performance
+# Setup the Dev Server
 
     #install docker
     ./setup.sh
@@ -14,7 +14,33 @@ Test Debezium Server Performance
     cd ~/yugabyte-2.13.1.0/bin/
     ./post_install.sh
 
+    # Setup maven and java 11
+    sudo yum install -y maven java-11-openjdk-devel java-11-openjdk
+    sudo alternatives --config java # Choose Java 11
+    echo "export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-11.0.15.0.9-2.el8_5.x86_64/" >> $HOME/.bashrc
+    ## Ensure Java 11 is chosen
+    source $HOME/.bashrc
+    java -version
+    mvn -version
+
+
+# Setup Yugabyte Cluster
+
+
+# Create a settings file
+
+
+#  Start all services in docker
+
+
     # Start docker containers
     docker compose -f docker-compose.yaml --env-file settings.env up -d
 
+# Setup Kafka Connect
 
+    ./cdc_setup.sh
+
+# Setup and run workloads
+
+    ./compile_apps.sh
+    ./run_workloads.sh
