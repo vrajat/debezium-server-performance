@@ -38,8 +38,8 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_OPTS: -Djdk.tls.client.protocols=TLSv1.2
-  volumes:
-    - $PWD/volumes/kafka/kafka-data::/var/lib/kafka/data
+    volumes:
+      - $PWD/volumes/kafka/kafka-data:/var/lib/kafka/data
 
   kafka-ui:
     container_name: kafka-ui
@@ -65,15 +65,15 @@ services:
       DEBEZIUM_SOURCE_CONNECTOR_CLASS: io.debezium.connector.yugabytedb.YugabyteDBConnector
       DEBEZIUM_SOURCE_OFFSET_STORAGE_FILE_FILENAME: data/offsets.dat
       DEBEZIUM_SOURCE_OFFSET_FLUSH_INTERVAL_MS: 0
-      DEBEZIUM_SOURCE_DATABASE_HOSTNAME: 10.150.0.116
+      DEBEZIUM_SOURCE_DATABASE_HOSTNAME: ${PGHOST}
       DEBEZIUM_SOURCE_DATABASE_PORT: 5433
       DEBEZIUM_SOURCE_DATABASE_USER: yugabyte
       DEBEZIUM_SOURCE_DATABASE_PASSWORD: yugabyte
       DEBEZIUM_SOURCE_DATABASE_DBNAME: yugabyte
       DEBEZIUM_SOURCE_DATABASE_SERVER_NAME: dbserver1
-      DEBEZIUM_SOURCE_DATABASE_STREAMID: fc2abfb129c64593840b32c69acd25d7
+      DEBEZIUM_SOURCE_DATABASE_STREAMID: ${CDC_SDK_STREAM_ID}
       DEBEZIUM_SOURCE_TABLE_INCLUDE_LIST: public.cdc_dbz_table
-      DEBEZIUM_SOURCE_DATABASE_MASTER_ADDRESSES: "10.150.0.116:7100,10.150.0.126:7100,10.150.0.89:7100"
+      DEBEZIUM_SOURCE_DATABASE_MASTER_ADDRESSES: ${MASTER_ADDRESSES}
       DEBEZIUM_SOURCE_SNAPSHOT_MODE: never
     volumes:
       - $PWD/volumes/debezium/data:/debezium/data
@@ -105,4 +105,6 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+    volumes:
+      - $PWD/volumes/pg/:/var/lib/postgresql/data
 

@@ -1,3 +1,5 @@
 volumes
 *.jar
 *.tar.gz
+settings.env
+
