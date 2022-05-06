@@ -18,7 +18,7 @@ mkdir -p $WORKING_DIR
 mkdir -p $TARGET_DIR
 cd $WORKING_DIR
 
-[[ -d yb-sample-apps ]] || sudo yum install java-11-openjdk-develgit clone https://github.com/suranjan/yb-sample-apps
+[[ -d yb-sample-apps ]] || git clone https://github.com/suranjan/yb-sample-apps
 cd  yb-sample-apps
 
 
