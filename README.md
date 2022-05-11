@@ -26,18 +26,22 @@
 
 # Setup Yugabyte Cluster
 
+    ./connector_setup.sh
 
 # Create a settings file
 
 
 #  Start all services in docker
 
+    # Start Debezium server
+    docker compose -f docker-compose-dbz.yaml --env-file settings.env up -d
 
     # Start docker containers
     docker compose -f docker-compose.yaml --env-file settings.env up -d
 
 # Setup Kafka Connect
 
+    # Setup consumers
     ./cdc_setup.sh
 
 # Setup and run workloads

@@ -10,6 +10,9 @@ fi
 
 export PATH=$PATH:$YBPATH
 
+ysqlsh -f ysql_drop_tables.sql
+yb-admin --master_addresses $MASTER_ADDRESSES delete_change_data_stream $CDC_SDK_STREAM_ID
+
 ysqlsh -f ysql_schema.sql 
-yb-admin create_change_data_stream ysql.yugabyte --master_addresses $PGHOST:7100
+yb-admin create_change_data_stream ysql.yugabyte --master_addresses $MASTER_ADDRESSES
 

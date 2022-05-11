@@ -1,6 +1,7 @@
 # Install docker docker. Not podman
 
 sudo yum install -y yum-utils
+sudo yum install sysstat
 
 sudo yum-config-manager \
     --add-repo \
