@@ -1,0 +1,73 @@
+services:
+  debezium1:
+    image: ${DEBEZIUM_IMAGE}
+    container_name: debezium-server1
+    ports:
+      - 8080:8080
+    environment:
+      DEBEZIUM_SINK_TYPE: nullStream
+      DEBEZIUM_SOURCE_CONNECTOR_CLASS: io.debezium.connector.yugabytedb.YugabyteDBConnector
+      DEBEZIUM_SOURCE_OFFSET_STORAGE_FILE_FILENAME: data/offsets.dat
+      DEBEZIUM_SOURCE_OFFSET_FLUSH_INTERVAL_MS: 0
+      DEBEZIUM_SOURCE_DATABASE_HOSTNAME: ${PGHOST}
+      DEBEZIUM_SOURCE_DATABASE_PORT: 5433
+      DEBEZIUM_SOURCE_DATABASE_USER: yugabyte
+      DEBEZIUM_SOURCE_DATABASE_PASSWORD: yugabyte
+      DEBEZIUM_SOURCE_DATABASE_DBNAME: yugabyte
+      DEBEZIUM_SOURCE_DATABASE_SERVER_NAME: dbserver1
+      DEBEZIUM_SOURCE_DATABASE_STREAMID: ${CDC_SDK_STREAM_ID}
+      DEBEZIUM_SOURCE_TABLE_INCLUDE_LIST: ${TABLES1}
+      DEBEZIUM_SOURCE_DATABASE_MASTER_ADDRESSES: ${MASTER_ADDRESSES}
+      DEBEZIUM_SOURCE_SNAPSHOT_MODE: never
+    volumes:
+      - $PWD/volumes/debezium/data:/debezium/data1
+
+  debezium2:
+    image: ${DEBEZIUM_IMAGE}
+    container_name: debezium-server2
+    ports:
+      - 8081:8080
+    environment:
+      DEBEZIUM_SINK_TYPE: nullStream
+      DEBEZIUM_SOURCE_CONNECTOR_CLASS: io.debezium.connector.yugabytedb.YugabyteDBConnector
+      DEBEZIUM_SOURCE_OFFSET_STORAGE_FILE_FILENAME: data/offsets.dat
+      DEBEZIUM_SOURCE_OFFSET_FLUSH_INTERVAL_MS: 0
+      DEBEZIUM_SOURCE_DATABASE_HOSTNAME: ${PGHOST}
+      DEBEZIUM_SOURCE_DATABASE_PORT: 5433
+      DEBEZIUM_SOURCE_DATABASE_USER: yugabyte
+      DEBEZIUM_SOURCE_DATABASE_PASSWORD: yugabyte
+      DEBEZIUM_SOURCE_DATABASE_DBNAME: yugabyte
+      DEBEZIUM_SOURCE_DATABASE_SERVER_NAME: dbserver1
+      DEBEZIUM_SOURCE_DATABASE_STREAMID: ${CDC_SDK_STREAM_ID}
+      DEBEZIUM_SOURCE_TABLE_INCLUDE_LIST: ${TABLES2}
+      DEBEZIUM_SOURCE_DATABASE_MASTER_ADDRESSES: ${MASTER_ADDRESSES}
+      DEBEZIUM_SOURCE_SNAPSHOT_MODE: never
+    volumes:
+      - $PWD/volumes/debezium/data:/debezium/data2
+
+  debezium3:
+    image: ${DEBEZIUM_IMAGE}
+    container_name: debezium-server3
+    ports:
+      - 8082:8080
+    environment:
+      DEBEZIUM_SINK_TYPE: nullStream
+      DEBEZIUM_SOURCE_CONNECTOR_CLASS: io.debezium.connector.yugabytedb.YugabyteDBConnector
+      DEBEZIUM_SOURCE_OFFSET_STORAGE_FILE_FILENAME: data/offsets.dat
+      DEBEZIUM_SOURCE_OFFSET_FLUSH_INTERVAL_MS: 0
+      DEBEZIUM_SOURCE_DATABASE_HOSTNAME: ${PGHOST}
+      DEBEZIUM_SOURCE_DATABASE_PORT: 5433
+      DEBEZIUM_SOURCE_DATABASE_USER: yugabyte
+      DEBEZIUM_SOURCE_DATABASE_PASSWORD: yugabyte
+      DEBEZIUM_SOURCE_DATABASE_DBNAME: yugabyte
+      DEBEZIUM_SOURCE_DATABASE_SERVER_NAME: dbserver1
+      DEBEZIUM_SOURCE_DATABASE_STREAMID: ${CDC_SDK_STREAM_ID}
+      DEBEZIUM_SOURCE_TABLE_INCLUDE_LIST: ${TABLES3}
+      DEBEZIUM_SOURCE_DATABASE_MASTER_ADDRESSES: ${MASTER_ADDRESSES}
+      DEBEZIUM_SOURCE_SNAPSHOT_MODE: never
+    volumes:
+      - $PWD/volumes/debezium/data:/debezium/data3
+
+
+
+
